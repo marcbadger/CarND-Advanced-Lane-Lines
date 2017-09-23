@@ -16,12 +16,16 @@ The goals / steps of this project were to:
 
 [//]: # (Image References)
 
-[detectedCorners]: ./output_images/corners_found4.jpg "Detected corners"
+[detectedCorners]: ./output_images/corners_found4.jpg "Detected corners."
 [undistortedCorners]: ./output_images/undistorted_corners_found4.jpg "Original image and undistorted, perspective transformed result."
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
+[undistortedRoad]: ./output_images/undistorted_comparison_test1.jpg "Original image and undistorted example image."
+[warpedPreprocessed]: ./output_images/output1_preprocessed_warped.gif "Example image thresholded using edge and color thresholds."
+[unwarpedPreprocessed]: ./output_images/output1_preprocessed_unwarped.gif "Example image thresholded using edge and color thresholds (unwarped)."
+[warpCheck]: ./output_images/warped_comparison_test5.jpg "Check verifying perspective transformation is working."
+[boxesGIF]: ./output_images/output1_boxes.gif "Sliding window detections on a short clip."
+[trackedJointGIF]: ./output_images/warped_comparison_test5.jpg "Polynomial fits to window boxes, lanes fit jointly so they have the same shape in the perspective transformed image."
+[trackedSepGIF]: ./output_images/warped_comparison_test5.jpg "Polynomial fits to window boxes, lanes fit independently so they can have different shapes in the perspective transformed image."
+[bouncingGIF]: ./output_images/warped_comparison_test5.jpg "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
 [video1]: ./project_video.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -42,7 +46,7 @@ The goals / steps of this project were to:
 
 ### Camera Calibration
 
-#### 1. OpenCV makes it a sinch to calculate a camera matrix and distortion parameters from a list of checkerboard images (e.g., "Original Image" in the figure below).  The code for this camera calibration is contained in camera_calibration.py.
+OpenCV makes it a sinch to calculate a camera matrix and distortion parameters from a list of checkerboard images (e.g., "Original Image" in the figure below).  The code for this camera calibration is contained in camera_calibration.py.
 
 The first step uses the `cv2.findChessboardCorners()` function to detect strong corners in an image and fit to these points a checkerboard of a specified number of squares. The image below shows an example of detected corners:
 
@@ -58,50 +62,80 @@ Finally, I used the calculated camera matrix (which contains the focal lengths a
 
 #### 1. Provide an example of a distortion-corrected image.
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+With our precomputed camera matrix and distortion coefficients, we can now undistort any image using `cv2.Undistort()`. In the image below you can see that this makes the slightly curving guard rail slightly straighter at the edges of the video (some of the original image is clipped by the undistortion function).
+
+![alt text][undistortedRoad]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+In my pipeline, I performed a perspective transform first (details below).  I did so because I expected the Sobel x gradient to be even more helpful in identifying lines in the "bird's eye view" because straight lines would now go straght up and down the image.
 
-![alt text][image3]
+Determining an appropriate color transform was the hardest part of the project and really made me wish I'd chosen to try doing semantic segmentation using FCNs from the start (e.g. [Long, et al. 2015](https://arxiv.org/pdf/1411.4038.pdf)), or at least spent time developing a GUI with which to sample color ranges based on region selections.  The task is to select target pixels using color and edge thresholds.  My color thresholds used the HLS (hue, saturation, lightness) color space.  Similar to m approach on [the first lane finding project](https://github.com/marcbadger/CarND-LaneLines-P1), I found yellow lines using the `cv2.inRange()` function to create a mask with a HLS intensity range of (15-120, 65-255, 120-255).  Some yellow lines had saturation less than 65, but decreasing the threshold on the saturation channel too much caused large sections of the road to be detected.  I found white lines using a range of (0-255, 0-30, 200-255).  I combined yellow and white masks using an OR operation.
+
+It turns out that the distribution of HLS intensities of the lines in some frames overlaps with that of the road in other frames (meaning that a single color threshold could not separate the line in all frames).  In cases where the number of detected pixels was below a certain threshold, I supplemented the yellow and white detections with an additional range (5, 34, 113) to (120, 255, 255) (code lines XXX-XXX in video_gen.py).
+
+I found gradient thresholds using the approach in the project description.  On perspective transformed images, I found Sobel x direction and Sobel gradient magnitude thresholds were particularly effective, while Sobel y direction and, surprisingly, Sobel gradient direction were not effective.  Perhaps the Sobel gradient direction could have been improved by first applying [non-max supression](https://en.wikipedia.org/wiki/Canny_edge_detector#Non-maximum_suppression).
+
+I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines XXX through XXX in `video_gen.py`).  I tested out all possible combinations of `and` and `or` between the three input thresholds (`gradx`, `gradmag`, and `color`) and found that ((gradx & gradmag) | color) worked best.  Here's an example of my output for this step (note that the actual image returned is binary, color is just for visualization here):
+
+![alt text][warpedPreprocessed]
+
+and re-transformed onto the road:
+
+![alt text][unwarpedPreprocessed]
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+I performed the perspective transform before applying the color threshold (reasons stated above).  I picked four "source" points on an image where the car was driving straight on a flat road, and used the `cv2.getPerspectiveTransform()` function to compute the transformation (and also its inverse) to four corners of a rectangle in a "bird's eye view" (code lines XXX-XXX in video_gen.py).  With this matrix, I then used the `cv2.warpPerspective()` function to warp the input image into the new view (code lines XXX-XXX in video_gen.py).
 
-```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-```
+Note that these points are hard coded and would need to change if the angle or height of the car with respect to the road changes (e.g., during bounces).  Here are the source and destination points.
 
 This resulted in the following source and destination points:
 
 | Source        | Destination   | 
 |:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
+| 598,  446     | 320, 0        | 
+| 682,  446     | 960, 0        |
+| 1024, 673     | 960, 720      |
+| 256,  673     | 320, 720      |
 
 I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
 
-![alt text][image4]
+![alt text][warpCheck]
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+##### 4.1 Sliding windows
+Thresholded images (hopefully) containing lane line pixels are processed using functions in the `tracker` class inside `tracker.py`.  I used the sliding window convolution method outlined in the project description.  The function `tracker.find_window_centroids()` takes in an image and, while moving from the bottom to the top of the image, finds peaks in the convolution signal of the image and a small window (one peak in the left half and one peak in the right half).  Hyperparameters for the window include the width (50), the height (80, meaning there will be 720/80 vertical locations), and the margin, which determines how far to the left and right the window is allowed to slide away from its location in the next lowest layer (a higher margin allows for a curvier road, but also will potentially find more areas with false positives).
 
-![alt text][image5]
+The centers of the peaks are then added to a list that records the locations of all peaks for all past frames. One thing I did differently from the code in the project description is I also kept track of the convolution signal and used it to filter the output where nothing was detected before fitting lane lines to the points.  The detected boxes for each frame along with the average boxes from the previous 15 frames are shown in green and red in the gif below.
+
+![alt text][boxesGIF]
+
+##### 4.2 Polynomial fitting
+I tried several approaches to fitting polynomials to the detected window centers. Note that I fit with x along the image height dimension and y along the image width dimension because curved road lines might not be functions the other way around. Approaches I tested and their functional forms included:
+* Fitting independent two degree polynomials for the left and right window centers from the last N frames
+	- a_l*x*x + b_l*x + c_l and a_r*x*x + b_r*x + c_r
+* Allowing the parameters of these polynomials to change with time (potentially achieving a better fit and possibly allowing to predict the lines in future frames based on past frames)
+	- (a_l_i*t + a_l_j)*x*x + (b_l_i*t + b_l_j)*x + (c_l_i*t + c_l_j) and right line parameters
+* Fitting the lane line data jointly by assuming polynomials for left and right lines must have same shape, but can be shifted left and right by an fitted parameter.
+	- (a_i*t + a_j)*x*x + (b_i*t + b_j)*x + (c_i*t + c_j) + (line_sep_i)*line_ind
+* Higher order polynomials in time for each of the parameters
+	- (a_i*t*t*t + a_j*t*t + a_k*t + a_l)*x*x + (b_i*t*t*t + b_j*t*t + b_k*t + b_l)*x + (c_i*t*t*t + c_j*t*t + c_k*t + c_l) + (line_sep_i)*line_ind
+
+I fit these functions to the data using my funciton `tracker.find_lane_fit_parameters()`, which ultimately calls the `scipy.optimize.curve_fit()`.  This function returns the parameters of the lane lines, which are used by the `tracker.get_line_fit_plot_points()` function to return a list of fitted lane points back to the call in `video_gen.py`.
+
+Overall, I found that all these techniques give pretty much the same result.  Shown below is the video generated by jointly fitting the lane lines with line parameters allowed to vary with time
+
+![alt text][trackedJointGIF]
+
+and here is what it looks like fitting the lines independently.
+
+![alt text][trackedSepGIF]
+
+I used joint fits to try and improve detection robustness when one of the lanes was missing, but notice that the projection for the joint fitting method isn't as good when the car bounces up and down!  My assumption that the lines have the same shape parameters separated by a fixed distance not a good one if the perspective transform is incorrect.  You can see this in the perspective transformed gif below where normally parallel lines are no longer parallel during bounces.  Fitting the lines independently actually looks visually better in this case, even if it's somewhat misleading about our actual knowledge about the world.  One next step could be to caculate a perturbation to the assumed projection based on how the difference distance between the two fitted lines changes as you move up and down the image.
+
+![alt text][bouncingGIF]
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
