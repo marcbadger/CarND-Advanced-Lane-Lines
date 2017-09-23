@@ -28,7 +28,7 @@ The goals / steps of this project were to:
 [bouncingGIF]: ./output_images/bouncing_example.gif "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
 [finalResult]: ./output_images/output1_tracked_long_15_joint_w_time.gif "Final result, lines fit jointly, allowing parameters to vary linearly over time, using the previous 15 frames of window locations for each frame."
 [video1]: ./project_video_tracked.mp4 "Video"
-[challengeResult]: ./output_images/challenge_video.gif "My pipeline didn't do as well on the challenge video!"
+[challengeResult]: ./output_images/challenge_tracked.gif "My pipeline didn't do as well on the challenge video!"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -169,13 +169,11 @@ Here's a [link to my video result](./project_video.mp4), using joint fitting and
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-
 One potential improvement would be to use the convlution signal (i.e. number of pixels found in the window box) as weights for the fit.  This bias the fit towards using confident detections where the lane line is clear.
 
 Another potential improvement would be to better estimate the perspective transform, or use the lane lines to determine a perterbation to the transform.  This would allow joint fitting of the left and right lane lines to do a better job.
 
-By far the biggest weakness of my pipeline is the color thresholding step.  Each new video has a different set of colors for the lines and pavement, which would be exaserbated by passing shadows, clouds, time of day, forests, etc.  My pipeline didn't to a great job on the challenge video.
+By far the biggest weakness of my pipeline is the color thresholding step.  Each new video has a different set of colors for the lines and pavement, which would be exaserbated by passing shadows, clouds, time of day, forests, etc.  My pipeline didn't to a great job on the challenge video (it just can't stay away from the edges on the cement barrier!)
 
 ![alt text][challengeResult]
 
