@@ -26,8 +26,8 @@ The goals / steps of this project were to:
 [trackedJointGIF]: ./output_images/output1_tracked_15_joint_w_time.gif "Polynomial fits to window boxes, lanes fit jointly so they have the same shape in the perspective transformed image."
 [trackedSepGIF]: ./output_images/output1_tracked_15_sep_w_time.gif "Polynomial fits to window boxes, lanes fit independently so they can have different shapes in the perspective transformed image."
 [bouncingGIF]: ./output_images/bouncing_example.gif "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
-[finalResult]: ./output_images/project_video.gif "Final result, lines fit jointly, allowing parameters to vary linearly over time, using the previous 15 frames of window locations for each frame."
-[video1]: ./project_video.mp4 "Video"
+[finalResult]: ./output_images/output1_tracked_long_15_joint_w_time.gif "Final result, lines fit jointly, allowing parameters to vary linearly over time, using the previous 15 frames of window locations for each frame."
+[video1]: ./project_video_tracked.mp4 "Video"
 [challengeResult]: ./output_images/challenge_video.gif "My pipeline didn't do as well on the challenge video!"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
