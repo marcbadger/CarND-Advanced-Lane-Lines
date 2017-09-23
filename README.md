@@ -70,7 +70,7 @@ With our precomputed camera matrix and distortion coefficients, we can now undis
 
 In my pipeline, I performed a perspective transform first (details below).  I did so because I expected the Sobel x gradient to be even more helpful in identifying lines in the "bird's eye view" because straight lines would now go straght up and down the image.
 
-Determining an appropriate color transform was the hardest part of the project and really made me wish I'd chosen to try doing semantic segmentation using FCNs from the start (e.g. [Long, et al. 2015](https://arxiv.org/pdf/1411.4038.pdf)), or at least spent time developing a GUI with which to sample color ranges based on region selections.  The task is to select target pixels using color and edge thresholds.  My color thresholds used the HLS (hue, saturation, lightness) color space.  Similar to m approach on [the first lane finding project](https://github.com/marcbadger/CarND-LaneLines-P1), I found yellow lines using the `cv2.inRange()` function to create a mask with a HLS intensity range of (15-120, 65-255, 120-255).  Some yellow lines had saturation less than 65, but decreasing the threshold on the saturation channel too much caused large sections of the road to be detected.  I found white lines using a range of (0-255, 0-30, 200-255).  I combined yellow and white masks using an OR operation.
+Determining an appropriate color transform was the hardest part of the project and really made me wish I'd chosen to try doing semantic segmentation using FCNs from the start (e.g. [Long, et al. 2015](https://arxiv.org/pdf/1411.4038.pdf)), or at least spent time developing a GUI with which to sample color ranges based on region selections.  The task is to select target pixels using color and edge thresholds.  My color thresholds used the HLS (hue, saturation, lightness) color space.  Similar to my approach on [the first lane finding project](https://github.com/marcbadger/CarND-LaneLines-P1), I found yellow lines using the `cv2.inRange()` function to create a mask with a HLS intensity range of (15-120, 65-255, 120-255).  Some yellow lines had saturation less than 65, but decreasing the threshold on the saturation channel too much caused large sections of the road to be detected.  I found white lines using a range of (0-255, 0-30, 200-255).  I combined yellow and white masks using an OR operation.
 
 It turns out that the distribution of HLS intensities of the lines in some frames overlaps with that of the road in other frames (meaning that a single color threshold could not separate the line in all frames).  In cases where the number of detected pixels was below a certain threshold, I supplemented the yellow and white detections with an additional range (5, 34, 113) to (120, 255, 255) (code lines XXX-XXX in video_gen.py).
 
@@ -115,13 +115,13 @@ The centers of the peaks are then added to a list that records the locations of 
 ##### 4.2 Polynomial fitting
 I tried several approaches to fitting polynomials to the detected window centers. Note that I fit with x along the image height dimension and y along the image width dimension because curved road lines might not be functions the other way around. Approaches I tested and their functional forms included:
 * Fitting independent two degree polynomials for the left and right window centers from the last N frames
-	- a_l*x*x + b_l*x + c_l and a_r*x*x + b_r*x + c_r
+	- a_l * x * x + b_l * x + c_l and a_r * x * x + b_r * x + c_r
 * Allowing the parameters of these polynomials to change with time (potentially achieving a better fit and possibly allowing to predict the lines in future frames based on past frames)
-	- (a_l_i*t + a_l_j)*x*x + (b_l_i*t + b_l_j)*x + (c_l_i*t + c_l_j) and right line parameters
+	- (a_l_i * t + a_l_j) * x * x + (b_l_i * t + b_l_j) * x + (c_l_i * t + c_l_j) and right line parameters
 * Fitting the lane line data jointly by assuming polynomials for left and right lines must have same shape, but can be shifted left and right by an fitted parameter.
-	- (a_i*t + a_j)*x*x + (b_i*t + b_j)*x + (c_i*t + c_j) + (line_sep_i)*line_ind
+	- (a_i * t + a_j) * x * x + (b_i * t + b_j) * x + (c_i * t + c_j) + (line_sep_i) * line_ind
 * Higher order polynomials in time for each of the parameters
-	- (a_i*t*t*t + a_j*t*t + a_k*t + a_l)*x*x + (b_i*t*t*t + b_j*t*t + b_k*t + b_l)*x + (c_i*t*t*t + c_j*t*t + c_k*t + c_l) + (line_sep_i)*line_ind
+	- (a_i * t * t * t + a_j * t * t + a_k * t + a_l) * x * x + (b_i * t * t * t + b_j * t * t + b_k * t + b_l) * x + (c_i * t * t * t + c_j * t * t + c_k * t + c_l) + (line_sep_i) * line_ind
 
 I fit these functions to the data using my funciton `tracker.find_lane_fit_parameters()`, which ultimately calls the `scipy.optimize.curve_fit()`.  This function returns the parameters of the lane lines, which are used by the `tracker.get_line_fit_plot_points()` function to return a list of fitted lane points back to the call in `video_gen.py`.
 
