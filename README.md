@@ -177,4 +177,4 @@ By far the biggest weakness of my pipeline is the color thresholding step.  Each
 
 ![alt text][challengeResult]
 
-Additional preprocessing techniques such as [adaptive thresholding](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.420.7883&rep=rep1&type=pdf), why not let a deep neural network like [SegNet](http://mi.eng.cam.ac.uk/projects/segnet/) define the thresholds for us?
+Additional preprocessing techniques such as [adaptive thresholding](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.420.7883&rep=rep1&type=pdf) could be useful. Ultimately, why not let a deep neural network like [SegNet](http://mi.eng.cam.ac.uk/projects/segnet/) define the thresholds and how to combine them for us?
