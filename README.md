@@ -26,8 +26,9 @@ The goals / steps of this project were to:
 [trackedJointGIF]: ./output_images/output1_tracked_15_joint_w_time.gif "Polynomial fits to window boxes, lanes fit jointly so they have the same shape in the perspective transformed image."
 [trackedSepGIF]: ./output_images/output1_tracked_15_sep_w_time.gif "Polynomial fits to window boxes, lanes fit independently so they can have different shapes in the perspective transformed image."
 [bouncingGIF]: ./output_images/bouncing_example.gif "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
-[finalResult]: ./output_images/project_video.gif "Video"
+[finalResult]: ./output_images/project_video.gif "Final result, lines fit jointly, allowing parameters to vary linearly over time, using the previous 15 frames of window locations for each frame."
 [video1]: ./project_video.mp4 "Video"
+[challengeResult]: ./output_images/challenge_video.gif "My pipeline didn't do as well on the challenge video!"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -146,7 +147,9 @@ I used joint fits to try and improve detection robustness when one of the lanes 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I calculated the radius of curvature in lines XXX through XXX in my code in `video_gen.py`.
+I calculated the radius of curvature in lines XXX through XXX in my code in `video_gen.py`.  To convert units from pixels to meters, I measured what I assumed was a 3 meter long road stripe (65 pixels) in the "bird's eye view", and also the distance between two lane lines (632 pixels), which I assumed was 3.7 meters.
+
+The resulting radii of curvature (400-1000 meters) are the right order of magnitude for freeway curve radii.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
@@ -168,4 +171,12 @@ Here's a [link to my video result](./project_video.mp4), using joint fitting and
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+One potential improvement would be to use the convlution signal (i.e. number of pixels found in the window box) as weights for the fit.  This bias the fit towards using confident detections where the lane line is clear.
+
+Another potential improvement would be to better estimate the perspective transform, or use the lane lines to determine a perterbation to the transform.  This would allow joint fitting of the left and right lane lines to do a better job.
+
+By far the biggest weakness of my pipeline is the color thresholding step.  Each new video has a different set of colors for the lines and pavement, which would be exaserbated by passing shadows, clouds, time of day, forests, etc.  My pipeline didn't to a great job on the challenge video.
+
+![alt text][challengeResult]
+
+Additional preprocessing techniques such as [adaptive thresholding](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.420.7883&rep=rep1&type=pdf), why not let a deep neural network like [SegNet](http://mi.eng.cam.ac.uk/projects/segnet/) define the thresholds for us?
