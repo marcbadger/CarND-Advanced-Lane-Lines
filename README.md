@@ -23,9 +23,9 @@ The goals / steps of this project were to:
 [unwarpedPreprocessed]: ./output_images/output1_preprocessed_unwarped.gif "Example image thresholded using edge and color thresholds (unwarped)."
 [warpCheck]: ./output_images/warped_comparison_test5.jpg "Check verifying perspective transformation is working."
 [boxesGIF]: ./output_images/output1_boxes.gif "Sliding window detections on a short clip."
-[trackedJointGIF]: ./output_images/warped_comparison_test5.jpg "Polynomial fits to window boxes, lanes fit jointly so they have the same shape in the perspective transformed image."
-[trackedSepGIF]: ./output_images/warped_comparison_test5.jpg "Polynomial fits to window boxes, lanes fit independently so they can have different shapes in the perspective transformed image."
-[bouncingGIF]: ./output_images/warped_comparison_test5.jpg "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
+[trackedJointGIF]: ./output_images/output1_tracked_15_joint_w_time.gif "Polynomial fits to window boxes, lanes fit jointly so they have the same shape in the perspective transformed image."
+[trackedSepGIF]: ./output_images/output1_tracked_15_sep_w_time.gif "Polynomial fits to window boxes, lanes fit independently so they can have different shapes in the perspective transformed image."
+[bouncingGIF]: ./output_images/bouncing_example.gif "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
 [video1]: ./project_video.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
