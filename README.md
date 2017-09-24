@@ -19,6 +19,8 @@ The goals / steps of this project were to:
 [detectedCorners]: ./output_images/corners_found4.jpg "Detected corners."
 [undistortedCorners]: ./output_images/undistorted_corners_found4.jpg "Original image and undistorted, perspective transformed result."
 [undistortedRoad]: ./output_images/undistorted_comparison_test1.jpg "Original image and undistorted example image."
+[missingLaneParts]: ./output_images/missing_lane_parts.jpg "Some segments of the lane in this image literally have the same HSV values as the road pixels do in some other frames."
+[foundLaneParts]: ./output_images/found_lane_parts.jpg "Adding another yellow threshold, used when total number of pixels detected is low helps."
 [warpedPreprocessed]: ./output_images/output1_preprocessed_warped.gif "Example image thresholded using edge and color thresholds."
 [unwarpedPreprocessed]: ./output_images/output1_preprocessed_unwarped.gif "Example image thresholded using edge and color thresholds (unwarped)."
 [warpCheck]: ./output_images/warped_comparison_test5.jpg "Check verifying perspective transformation is working."
@@ -74,7 +76,13 @@ In my pipeline, I performed a perspective transform first (details below).  I di
 
 Determining an appropriate color transform was the hardest part of the project and really made me wish I'd chosen to try doing semantic segmentation using FCNs from the start (e.g. [Long, et al. 2015](https://arxiv.org/pdf/1411.4038.pdf)), or at least spent time developing a GUI with which to sample color ranges based on region selections.  The task is to select target pixels using color and edge thresholds.  My color thresholds used the HLS (hue, saturation, lightness) color space.  Similar to my approach on [the first lane finding project](https://github.com/marcbadger/CarND-LaneLines-P1), I found yellow lines using the `cv2.inRange()` function to create a mask with a HLS intensity range of (15-120, 65-255, 120-255).  Some yellow lines had saturation less than 65, but decreasing the threshold on the saturation channel too much caused large sections of the road to be detected.  I found white lines using a range of (0-255, 0-30, 200-255).  I combined yellow and white masks using an OR operation.
 
-It turns out that the distribution of HLS intensities of the lines in some frames overlaps with that of the road in other frames (meaning that a single color threshold could not separate the line in all frames).  In cases where the number of detected pixels was below a certain threshold, I supplemented the yellow and white detections with an additional range (5, 34, 113) to (120, 255, 255) (code lines XXX-XXX in video_gen.py).
+It turns out that the distribution of HLS intensities of the lines in some frames overlaps with that of the road in other frames (meaning that a single color threshold could not separate the line in all frames). For example the pixels circled below are literally the same HSV color as the road in several other frames.
+
+![alt text][missingLaneParts]
+
+In cases where the number of detected pixels was below a certain threshold, I supplemented the yellow and white detections with an additional range (5, 34, 113) to (120, 255, 255) (code lines XXX-XXX in video_gen.py). Doing so helped it find the additional part of the lane line at the cost of some noise in the bottom right.
+
+![alt text][foundLaneParts]
 
 I found gradient thresholds using the approach in the project description.  On perspective transformed images, I found Sobel x direction and Sobel gradient magnitude thresholds were particularly effective, while Sobel y direction and, surprisingly, Sobel gradient direction were not effective.  Perhaps the Sobel gradient direction could have been improved by first applying [non-max supression](https://en.wikipedia.org/wiki/Canny_edge_detector#Non-maximum_suppression).
 
@@ -85,6 +93,8 @@ I used a combination of color and gradient thresholds to generate a binary image
 and re-transformed onto the road:
 
 ![alt text][unwarpedPreprocessed]
+
+Finally, I used a region of interest (seen in the Sliding windows figure below) to eliminate detections too far from where we expect them to be.  Note that in a fully self driving setting, this would be a bad idea because you still need to detect lanes even if you're straddling one!
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
@@ -173,7 +183,7 @@ One potential improvement would be to use the convlution signal (i.e. number of 
 
 Another potential improvement would be to better estimate the perspective transform, or use the lane lines to determine a perterbation to the transform.  This would allow joint fitting of the left and right lane lines to do a better job.
 
-By far the biggest weakness of my pipeline is the color thresholding step.  Each new video has a different set of colors for the lines and pavement, which would be exaserbated by passing shadows, clouds, time of day, forests, etc.  My pipeline didn't to a great job on the challenge video (it just can't stay away from the edges on the cement barrier!)
+By far the biggest weakness of my pipeline is the color thresholding step.  Each new video has a different set of colors for the lines and pavement, which would be exaserbated by passing shadows, clouds, time of day, forests, etc.  My method of looking at the videos, measuring brightess of line regions, of road regions, and combining them into a threshold seemed to generate a new case for each "problem segment" in the video.  I have low confidence that these parameters would generalize to a new setting. For instance, my pipeline didn't to a great job on the challenge video (it just can't stay away from the edges on the cement barrier!)
 
 ![alt text][challengeResult]
 
