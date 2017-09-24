@@ -136,6 +136,7 @@ I tried several approaches to fitting polynomials to the detected window centers
 	- (a_i * t * t * t + a_j * t * t + a_k * t + a_l) * x * x + (b_i * t * t * t + b_j * t * t + b_k * t + b_l) * x + (c_i * t * t * t + c_j * t * t + c_k * t + c_l) + (line_sep_i) * line_ind
 
 The data matrix for the joint fit looks like this:
+
 | Horizontal position (y) | Vertical position (x)| Lane indicator (right = 0) |
 |:-----------------------:|:--------------------:|:--------------------------:| 
 |             leftx       |       res_yvals      |              1             |
