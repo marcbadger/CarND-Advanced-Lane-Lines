@@ -46,7 +46,7 @@ The goals / steps of this project were to:
 * [video_gen.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/video_gen.py) - a Python script to run the tracking pipeline on sample videos
 * [tracker_vid.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/tracker_vid.py) - a Python class that handles lane finding and fitting
 * [project_video_tracked.mp4](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/project_video_tracked.mp4) - the output of the lane finding pipeline on the sample video.
-* [example output images](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/tree/master/output_images)
+* [example output images](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/tree/master/output_images) - intermediate output of image_gen.py
 * [README.md, this document](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/README.md) - a writeup report summarizing the results
 
 ### Camera Calibration
