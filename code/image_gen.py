@@ -1,3 +1,10 @@
+# Marc Badger
+# 9.23.17
+# Advanced Lane Finding Project
+# NOTE! Much of this code is nearly an exact duplicate of the code in video_gen.py,
+# 		with some minor changes for working with and saving images of intermediate steps.
+# See also video_gen.py, tracker.py, and camera_calibration.py
+
 import numpy as np
 import cv2
 import pickle

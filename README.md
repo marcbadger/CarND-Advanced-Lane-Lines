@@ -41,11 +41,11 @@ The goals / steps of this project were to:
 ### Writeup / README
 
 #### 1. My project includes the following files:
-* [camera_calibration.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python script to generate camera matrix and distortion coefficients from checkerboard images
-* [image_gen.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python script to run the tracking pipeline on sample images
-* [video_gen.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python script to run the tracking pipeline on sample videos
-* [tracker_vid.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python class that handles lane finding and fitting
-* [project_video_tracked.mp4](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.mp4) - the output of the lane finding pipeline on the sample video.
+* [camera_calibration.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/camera_calibration.py) - a Python script to generate camera matrix and distortion coefficients from checkerboard images
+* [image_gen.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/image_gen.py) - a Python script to run the tracking pipeline on sample images
+* [video_gen.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/video_gen.py) - a Python script to run the tracking pipeline on sample videos
+* [tracker_vid.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/tracker_vid.py) - a Python class that handles lane finding and fitting
+* [project_video_tracked.mp4](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/code/project_video_tracked.mp4) - the output of the lane finding pipeline on the sample video.
 * [README.md, this document](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/README.md) - a writeup report summarizing the results
 
 ### Camera Calibration
@@ -80,13 +80,13 @@ It turns out that the distribution of HLS intensities of the lines in some frame
 
 ![alt text][missingLaneParts]
 
-In cases where the number of detected pixels was below a certain threshold, I supplemented the yellow and white detections with an additional range (5, 34, 113) to (120, 255, 255) (code lines XXX-XXX in video_gen.py). Doing so helped it find the additional part of the lane line at the cost of some noise in the bottom right.
+In cases where the number of detected pixels was below a certain threshold, I supplemented the yellow and white detections with an additional range (5, 34, 113) to (120, 255, 255) (code lines 109-112, 134-136 in video_gen.py). Doing so helped it find the additional part of the lane line at the cost of some noise in the bottom right.
 
 ![alt text][foundLaneParts]
 
 I found gradient thresholds using the approach in the project description.  On perspective transformed images, I found Sobel x direction and Sobel gradient magnitude thresholds were particularly effective, while Sobel y direction and, surprisingly, Sobel gradient direction were not effective.  Perhaps the Sobel gradient direction could have been improved by first applying [non-max supression](https://en.wikipedia.org/wiki/Canny_edge_detector#Non-maximum_suppression).
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines XXX through XXX in `video_gen.py`).  I tested out all possible combinations of `and` and `or` between the three input thresholds (`gradx`, `gradmag`, and `color`) and found that ((gradx & gradmag) | color) worked best.  Here's an example of my output for this step (note that the actual image returned is binary, color is just for visualization here):
+I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines 98-138 and 228-272 in `video_gen.py`).  I tested out all possible combinations of `and` and `or` between the three input thresholds (`gradx`, `gradmag`, and `color`) and found that ((gradx & gradmag) | color) worked best.  Here's an example of my output for this step (note that the actual image returned is binary, color is just for visualization here):
 
 ![alt text][warpedPreprocessed]
 
@@ -98,7 +98,7 @@ Finally, I used a region of interest (seen in the Sliding windows figure below) 
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-I performed the perspective transform before applying the color threshold (reasons stated above).  I picked four "source" points on an image where the car was driving straight on a flat road, and used the `cv2.getPerspectiveTransform()` function to compute the transformation (and also its inverse) to four corners of a rectangle in a "bird's eye view" (code lines XXX-XXX in video_gen.py).  With this matrix, I then used the `cv2.warpPerspective()` function to warp the input image into the new view (code lines XXX-XXX in video_gen.py).
+I performed the perspective transform before applying the color threshold (reasons stated above).  I picked four "source" points on an image where the car was driving straight on a flat road, and used the `cv2.getPerspectiveTransform()` function to compute the transformation (and also its inverse) to four corners of a rectangle in a "bird's eye view" (code lines 210-212 in video_gen.py).  With this matrix, I then used the `cv2.warpPerspective()` function to warp the input image into the new view (code line 215 in video_gen.py).
 
 Note that these points are hard coded and would need to change if the angle or height of the car with respect to the road changes (e.g., during bounces).  Here are the source and destination points.
 
@@ -157,13 +157,13 @@ I used joint fits to try and improve detection robustness when one of the lanes 
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I calculated the radius of curvature in lines XXX through XXX in my code in `video_gen.py`.  To convert units from pixels to meters, I measured what I assumed was a 3 meter long road stripe (65 pixels) in the "bird's eye view", and also the distance between two lane lines (632 pixels), which I assumed was 3.7 meters.
+I calculated the radius of curvature in lines 347 through 348 in my code in `video_gen.py`.  To convert units from pixels to meters, I measured what I assumed was a 3 meter long road stripe (65 pixels) in the "bird's eye view", and also the distance between two lane lines (632 pixels), which I assumed was 3.7 meters.
 
 The resulting radii of curvature (400-1000 meters) are the right order of magnitude for freeway curve radii.
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines XXX through XXX in my code in `video_gen.py`.  You can see the result in the tracked gifs above.
+I plotted the fitted lines and re-transforming back to the original perspective in lines 326 through 341 in my code in `video_gen.py`.  You can see the result in the tracked gifs above.
 
 ---
 

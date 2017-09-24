@@ -1,7 +1,7 @@
 # Marc Badger
 # 9.23.17
 # Advanced Lane Finding Project
-# See also video_gen.py, tracker.py, and image_gen.py
+# See also video_gen.py, tracker.py, image_gen.py, and camera_calibration.py
 
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
