@@ -16,21 +16,21 @@ The goals / steps of this project were to:
 
 [//]: # (Image References)
 
-[detectedCorners]: ./output_images/corners_found4.jpg "Detected corners."
-[undistortedCorners]: ./output_images/undistorted_corners_found4.jpg "Original image and undistorted, perspective transformed result."
-[undistortedRoad]: ./output_images/undistorted_comparison_test1.jpg "Original image and undistorted example image."
-[missingLaneParts]: ./output_images/missing_lane_parts.JPG "Some segments of the lane in this image literally have the same HSV values as the road pixels do in some other frames."
-[foundLaneParts]: ./output_images/found_lane_parts.JPG "Adding another yellow threshold, used when total number of pixels detected is low helps."
-[warpedPreprocessed]: ./output_images/output1_preprocessed_warped.gif "Example image thresholded using edge and color thresholds."
-[unwarpedPreprocessed]: ./output_images/output1_preprocessed_unwarped.gif "Example image thresholded using edge and color thresholds (unwarped)."
-[warpCheck]: ./output_images/warped_comparison_test5.jpg "Check verifying perspective transformation is working."
-[boxesGIF]: ./output_images/output1_boxes.gif "Sliding window detections on a short clip."
-[trackedJointGIF]: ./output_images/output1_tracked_15_joint_w_time.gif "Polynomial fits to window boxes, lanes fit jointly so they have the same shape in the perspective transformed image."
-[trackedSepGIF]: ./output_images/output1_tracked_15_sep_w_time.gif "Polynomial fits to window boxes, lanes fit independently so they can have different shapes in the perspective transformed image."
-[bouncingGIF]: ./output_images/bouncing_example.gif "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
-[finalResult]: ./output_images/output1_tracked_long_15_joint_w_time.gif "Final result, lines fit jointly, allowing parameters to vary linearly over time, using the previous 15 frames of window locations for each frame."
+[detectedCorners]: ./examples/corners_found4.jpg "Detected corners."
+[undistortedCorners]: ./examples/undistorted_corners_found4.jpg "Original image and undistorted, perspective transformed result."
+[undistortedRoad]: ./examples/undistorted_comparison_test1.jpg "Original image and undistorted example image."
+[missingLaneParts]: ./examples/missing_lane_parts.JPG "Some segments of the lane in this image literally have the same HSV values as the road pixels do in some other frames."
+[foundLaneParts]: ./examples/found_lane_parts.JPG "Adding another yellow threshold, used when total number of pixels detected is low helps."
+[warpedPreprocessed]: ./examples/output1_preprocessed_warped.gif "Example image thresholded using edge and color thresholds."
+[unwarpedPreprocessed]: ./examples/output1_preprocessed_unwarped.gif "Example image thresholded using edge and color thresholds (unwarped)."
+[warpCheck]: ./examples/warped_comparison_test5.jpg "Check verifying perspective transformation is working."
+[boxesGIF]: ./examples/output1_boxes.gif "Sliding window detections on a short clip."
+[trackedJointGIF]: ./examples/output1_tracked_15_joint_w_time.gif "Polynomial fits to window boxes, lanes fit jointly so they have the same shape in the perspective transformed image."
+[trackedSepGIF]: ./examples/output1_tracked_15_sep_w_time.gif "Polynomial fits to window boxes, lanes fit independently so they can have different shapes in the perspective transformed image."
+[bouncingGIF]: ./examples/bouncing_example.gif "The perspective transform changes when the car bounces, making decreasing the fit quaility when fitting lines jointly."
+[finalResult]: ./examples/output1_tracked_long_15_joint_w_time.gif "Final result, lines fit jointly, allowing parameters to vary linearly over time, using the previous 15 frames of window locations for each frame."
 [video1]: ./project_video_tracked.mp4 "Video"
-[challengeResult]: ./output_images/challenge_tracked.gif "My pipeline didn't do as well on the challenge video!"
+[challengeResult]: ./examples/challenge_tracked.gif "My pipeline didn't do as well on the challenge video!"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -44,7 +44,7 @@ The goals / steps of this project were to:
 * [camera_calibration.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python script to generate camera matrix and distortion coefficients from checkerboard images
 * [image_gen.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python script to run the tracking pipeline on sample images
 * [video_gen.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python script to run the tracking pipeline on sample videos
-* [tracker.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python class that handles lane finding and fitting
+* [tracker_vid.py](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.py) - a Python class that handles lane finding and fitting
 * [project_video_tracked.mp4](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/XXX.mp4) - the output of the lane finding pipeline on the sample video.
 * [README.md, this document](https://github.com/marcbadger/CarND-Advanced-Lane-Lines/blob/master/README.md) - a writeup report summarizing the results
 
@@ -181,7 +181,7 @@ Here's a [link to my video result](./project_video.mp4), using joint fitting and
 
 One potential improvement would be to use the convlution signal (i.e. number of pixels found in the window box) as weights for the fit.  This bias the fit towards using confident detections where the lane line is clear.
 
-Another potential improvement would be to better estimate the perspective transform, or use the lane lines to determine a perterbation to the transform.  This would allow joint fitting of the left and right lane lines to do a better job.
+Another potential improvement would be to better estimate the perspective transform, or use the lane lines to determine a perterbation to the transform.  This would allow joint fitting of the left and right lane lines to do a better job.  It would also be interesting to track sections of the dashed lane to determine the vehicle's speed.
 
 By far the biggest weakness of my pipeline is the color thresholding step.  Each new video has a different set of colors for the lines and pavement, which would be exaserbated by passing shadows, clouds, time of day, forests, etc.  My method of looking at the videos, measuring brightess of line regions, of road regions, and combining them into a threshold seemed to generate a new case for each "problem segment" in the video.  I have low confidence that these parameters would generalize to a new setting. For instance, my pipeline didn't to a great job on the challenge video (it just can't stay away from the edges on the cement barrier!)
 
